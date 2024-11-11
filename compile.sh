@@ -18,7 +18,7 @@ run()
 {
     compile_loader
     compile_kernel
-    
+    #这里可以更改
     /home/cs/bochs/bin/bochs -f /home/cs/bochs/bin/bochsrc.disk
 }
 
