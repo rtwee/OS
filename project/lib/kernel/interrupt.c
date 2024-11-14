@@ -26,6 +26,9 @@ struct gate_desc
 //静态函数声明
 static void make_idt_desc(struct gate_desc * p_gdesc,uint8_t attr,intr_handler function);
 static struct gate_desc idt[IDT_DESC_CNT];  //中断描述符表,本质上就是中段门描述符数组
+
+char * intr_name[IDT_DESC_CNT]; //保存异常名
+intr_handler idt_table[IDT_DESC_CNT];   //这是将来中断服务程序要调用的程序
 extern intr_handler intr_entry_table[IDT_DESC_CNT]; //中断服务程序的入口地址数组intr_entry_table,在kernel.S中已经构造好了，就是各个终端服务子程序
 
 
@@ -73,15 +76,56 @@ static void idt_desc_init(void)
     put_str(" idt_desc_init done\n");
 }
 
+//通用中断处理函数
+static void general_intr_handler(uint8_t vec_nr)
+{
+    if(vec_nr == 0x27 || vec_nr == 0x2f)    return;     //当IRQ7和IRQ15产生的伪中断，可以不理会
+    put_str("int vector : 0x");
+    put_int(vec_nr);
+    put_char('\n');
+}
+//做中断处理函数注册，以及异常名称注册
+static void exception_init(void)
+{
+    int i;
+    for(i = 0;i < IDT_DESC_CNT;i++)
+    {
+        idt_table[i]=general_intr_handler;
+        intr_name[i]="unkown";
+    }
+
+   intr_name[0] = "#DE Divide Error";
+   intr_name[1] = "#DB Debug Exception";
+   intr_name[2] = "NMI Interrupt";
+   intr_name[3] = "#BP Breakpoint Exception";
+   intr_name[4] = "#OF Overflow Exception";
+   intr_name[5] = "#BR BOUND Range Exceeded Exception";
+   intr_name[6] = "#UD Invalid Opcode Exception";
+   intr_name[7] = "#NM Device Not Available Exception";
+   intr_name[8] = "#DF Double Fault Exception";
+   intr_name[9] = "Coprocessor Segment Overrun";
+   intr_name[10] = "#TS Invalid TSS Exception";
+   intr_name[11] = "#NP Segment Not Present";
+   intr_name[12] = "#SS Stack Fault Exception";
+   intr_name[13] = "#GP General Protection Exception";
+   intr_name[14] = "#PF Page-Fault Exception";
+   // intr_name[15] 第15项是intel保留项，未使用
+   intr_name[16] = "#MF x87 FPU Floating-Point Error";
+   intr_name[17] = "#AC Alignment Check Exception";
+   intr_name[18] = "#MC Machine-Check Exception";
+   intr_name[19] = "#XF SIMD Floating-Point Exception";
+}
+
 //完成有关中断的所有初始化工作
 void idt_init()
 {
     put_str("idt_init start\n");
     idt_desc_init();
+    exception_init();
     pic_init();
 
     // //加载idt  idt存一个48位的数据，低16位是有多少个中断，高32位是中断描述符表的基址
-   uint64_t idt_operand = ((sizeof(idt) - 1) | ((uint64_t)(uint32_t)idt << 16));
-   asm volatile("lidt %0" : : "m" (idt_operand));
+    uint64_t idt_operand = ((sizeof(idt) - 1) | ((uint64_t)(uint32_t)idt << 16));
+    asm volatile("lidt %0" : : "m" (idt_operand));
     put_str("idt_init done\n");
 }

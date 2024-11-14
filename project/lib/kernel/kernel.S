@@ -2,30 +2,46 @@
 %define ERROR_CODE nop          ;这两个宏保证了在中断处理的栈空间中，EIP退回前都含有一个错误码
 %define ZERO push 0             ;若相关的异常中没有压入错误码，wile统一格式，就手动压入一个0
 
+extern idt_table
 extern put_str                 ;声明外部函数
 
 section .data
-intr_str db "interrupt occur!",0xa,0
 global intr_entry_table
 intr_entry_table:
 
 %macro VECTOR 2                 ;VECTOR表示宏名称 后面表示参数个数%1 %2
 section .text                   
 intr%1entry:
-    %2                          
-    push intr_str               ;先打印进入中断的信息
-    call put_str
-    add esp,4
 
-    mov al,0x20                 ;发送EOI信号
-    out 0xa0,al
-    out 0x20,al
+    %2       
+    push ds
+    push es
+    push fs
+    push gs
+    pushad                      ;保护上下文
 
-    add esp,4
-    iret
+    mov al,0x20                   ; 中断结束命令EOI
+    out 0xa0,al                   ; 向从片发送
+    out 0x20,al                   ; 向主片发送
+
+    push %1                     ;中断向量号
+    call [idt_table + %1*4]
+    jmp intr_exit
 section .data
     dd intr%1entry
 %endmacro
+
+section .text
+global intr_exit
+intr_exit:
+    add esp,4                   ;先跳过中断向量号
+    popad
+    pop gs 
+    pop fs 
+    pop es 
+    pop ds 
+    add esp,4                   ;返回时跳过error_code
+    iretd
 
 VECTOR 0x0 ,ZERO
 VECTOR 0X1 ,ZERO
