@@ -2,7 +2,7 @@
 %define ERROR_CODE nop          ;这两个宏保证了在中断处理的栈空间中，EIP退回前都含有一个错误码
 %define ZERO push 0             ;若相关的异常中没有压入错误码，wile统一格式，就手动压入一个0
 
-extern push_str                 ;声明外部函数
+extern put_str                 ;声明外部函数
 
 section .data
 intr_str db "interrupt occur!",0xa,0

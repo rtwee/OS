@@ -10,11 +10,11 @@
 //向端口指定N表示0-255,d表示用dx存储端口号
 static inline void outb(uint16_t port,uint8_t data)
 {
-    //"a"是用al寄存器，Nd是指定端口N到dx寄存器
+    //"a"是用al寄存器，Nd是指定端口N到dx寄存器(N是立即数约定0-255分为)
     asm volatile( "outb %b0,%w1" : : "a"(data),"Nd"(port));
 }
 
-//将addr处起始的word_cnt个字写道端口port中
+//将addr处起始的word_cnt个字写道端口port中,一次写两个字节w
 static inline void outsw(uint16_t port,const void * addr,uint32_t word_cnt)
 {
     /*
@@ -30,7 +30,7 @@ static inline void outsw(uint16_t port,const void * addr,uint32_t word_cnt)
 static inline uint8_t inb(uint16_t port)
 {
     uint8_t data;
-    asm volatile("inb %w1,%b0":"a"(data):"Nd"(port));
+    asm volatile("inb %w1,%b0":"=a"(data):"Nd"(port));
     return data;
 }
 
@@ -39,6 +39,7 @@ static inline void insw(uint16_t port,void * addr,uint32_t word_cnt)
 {
     /*
         将端口port处读入的16为内容写入到edi中
+        memory通知内存已经被破坏了
     */
     asm volatile("cld;rep insw":"+D"(addr),"+c"(word_cnt):"d"(port):"memory");
 }
