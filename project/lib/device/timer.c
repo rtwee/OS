@@ -2,7 +2,7 @@
 #include "../kernel/io.h"
 #include "../kernel/print.h"
 
-#define IRQ_FREQUENCY       5
+#define IRQ_FREQUENCY       100
 #define INPUT_FREQUENCY     1193180
 #define COUNTERO_VALUE      INPUT_FREQUENCY / IRQ_FREQUENCY
 #define COINTERO_PORT       0x40

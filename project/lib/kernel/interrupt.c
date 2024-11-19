@@ -12,6 +12,8 @@
 #define PIC_S_CTRL 0xa0         //从片控制端口
 #define PIC_S_DATA 0xa1         //从片数据端口
 
+#define EFLAGS_IF   0x00000200  //eflags寄存器中的if位为1,要进行中断屏蔽的时候就是设置这个寄存器
+#define GET_EFLAGS(EFLAGS_VAR) asm volatile("pushfl; popl %0" : "=g"(EFLAGS_VAR))   //将flags寄存器压栈，在弹出到变量中
 
 //中断门描述符结构体8字节，对应按顺序从低位到高位
 struct gate_desc
@@ -29,6 +31,7 @@ static struct gate_desc idt[IDT_DESC_CNT];  //中断描述符表,本质上就是
 
 char * intr_name[IDT_DESC_CNT]; //保存异常名
 intr_handler idt_table[IDT_DESC_CNT];   //这是将来中断服务程序要调用的程序
+
 extern intr_handler intr_entry_table[IDT_DESC_CNT]; //中断服务程序的入口地址数组intr_entry_table,在kernel.S中已经构造好了，就是各个终端服务子程序
 
 
@@ -114,6 +117,54 @@ static void exception_init(void)
    intr_name[17] = "#AC Alignment Check Exception";
    intr_name[18] = "#MC Machine-Check Exception";
    intr_name[19] = "#XF SIMD Floating-Point Exception";
+}
+
+//开中断并返回开中断前的状态
+enum intr_status intr_enable()
+{
+    enum intr_status old_status;
+    if(INTR_ON == intr_get_status())
+    {
+        old_status = INTR_ON;
+        return old_status;
+    }
+    else
+    {
+        old_status=INTR_OFF;
+        asm volatile("sti");    //开中断，sti将IF设置为1
+        return old_status;
+    }
+}
+
+//关中断，并且返回关中断前的状态
+enum intr_status intr_disable()
+{
+    enum intr_status old_status;
+    if(INTR_ON == intr_get_status())
+    {
+        old_status = INTR_ON;
+        asm volatile("cli":::"memory");//关中断，并且将IF位置零
+        return old_status;
+    }
+    else
+    {
+        old_status=INTR_OFF;
+        return old_status;
+    }
+}
+
+//将中断状态设置为status
+enum intr_status intr_set_status(enum intr_status status)
+{
+    return status & INTR_ON ? intr_enable() : intr_disable();
+}
+
+//获取当前中断状态
+enum intr_status intr_get_status()
+{
+    uint32_t eflags = 0;
+    GET_EFLAGS(eflags);
+    return (EFLAGS_IF & eflags)?INTR_ON:INTR_OFF;
 }
 
 //完成有关中断的所有初始化工作
