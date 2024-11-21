@@ -1,7 +1,7 @@
 #include "init.h"
 #include "print.h"
 #include "interrupt.h"
-#include "../device/timer.h"
+#include "timer.h"
 //负责所有模块的初始化
 void init_all()
 {

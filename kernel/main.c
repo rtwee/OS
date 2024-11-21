@@ -6,11 +6,14 @@
 #include "init.h"
 #include "debug.h"
 #include "string.h"
+#include "memory.h"
+
 int main(void)
 {
     put_str("I am kernel\n");
     init_all();
-
+    mem_init();
+    
     ASSERT(strcmp("bbb","bbb"));
     asm volatile("sti");    //演示中断处理
     while(1);
