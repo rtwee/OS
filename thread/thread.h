@@ -69,4 +69,9 @@ struct task_struct
     uint32_t stack_magic;   //栈的边界标记
 };
 
+void kernel_thread(thread_func* function,void* func_arg);
+void thread_create(struct task_struct* pthread,thread_func function,void* func_arg);
+void init_thread(struct task_struct* pthread,char* name,int prio);
+struct task_struct* thread_start(char* name,int prio,thread_func function,void* func_arg);
+
 #endif

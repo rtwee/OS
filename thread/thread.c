@@ -6,7 +6,10 @@
 #define PG_SIZE 4096
 
 //由kernel_thread去执行function
-static void kernel_thread(thread_func * function,void * func_arg);
+void kernel_thread(thread_func * function,void * func_arg)
+{
+    function(func_arg);
+}
 
 //初始化线程栈thread_stack
 void thread_create(struct task_struct * pthread,thread_func function,void * func_arg)
@@ -14,7 +17,7 @@ void thread_create(struct task_struct * pthread,thread_func function,void * func
     pthread->self_ksatck -= sizeof(struct intr_stack);//给中断栈预留空间,线程进入中断的话，通过该栈来保存上下文(还能保存用户进程的初始信息)
     pthread->self_ksatck -= sizeof(struct thread_stack);//在流出线程栈使用的空间
     struct thread_stack * kthread_stack = (struct thread_stack *)pthread->self_ksatck;
-    kthread_stack->eip = function;
+    kthread_stack->eip = kernel_thread;
     kthread_stack->function=function;
     kthread_stack->func_arg=func_arg;
     kthread_stack->ebp=kthread_stack->ebx=kthread_stack->esi=kthread_stack->edi=0;
