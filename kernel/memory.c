@@ -71,61 +71,61 @@ void* palloc(struct pool* m_pool)
     return (void*)page_phyaddr;
 }
 
-// void page_table_add(void* _vaddr,void* _page_phyaddr)
-// {
-//     uint32_t vaddr = (uint32_t)_vaddr,page_phyaddr = (uint32_t)_page_phyaddr;
-//     uint32_t* pde = pde_ptr(vaddr);
-//     uint32_t* pte = pte_ptr(vaddr);
+void page_table_add(void* _vaddr,void* _page_phyaddr)
+{
+    uint32_t vaddr = (uint32_t)_vaddr,page_phyaddr = (uint32_t)_page_phyaddr;
+    uint32_t* pde = pde_ptr(vaddr);
+    uint32_t* pte = pte_ptr(vaddr);
     
-//     if(*pde & 0x00000001)
-//     {
-//     	ASSERT(!(*pte & 0x00000001));
-//     	if(!(*pte & 0x00000001))
-//     	    *pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
-//     	else
-//     	{
-//     	    PANIC("pte repeat");
-//     	    *pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
-//     	}
-//     } 
-//     else
-//     {
-//     	uint32_t pde_phyaddr = (uint32_t)palloc(&kernel_pool);
-//     	*pde = (pde_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
-//     	memset((void*)((int)pte & 0xfffff000),0,PG_SIZE);
-//     	ASSERT(!(*pte & 0x00000001));
-//     	*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
-//     }
-//     return;
-// }
+    if(*pde & 0x00000001)
+    {
+    	ASSERT(!(*pte & 0x00000001));
+    	if(!(*pte & 0x00000001))
+    	    *pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+    	else
+    	{
+    	    PANIC("pte repeat");
+    	    *pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+    	}
+    } 
+    else
+    {
+    	uint32_t pde_phyaddr = (uint32_t)palloc(&kernel_pool);
+    	*pde = (pde_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+    	memset((void*)((int)pte & 0xfffff000),0,PG_SIZE);
+    	ASSERT(!(*pte & 0x00000001));
+    	*pte = (page_phyaddr | PG_US_U | PG_RW_W | PG_P_1);
+    }
+    return;
+}
 
-// void* malloc_page(enum pool_flags pf,uint32_t pg_cnt)
-// {
-//     ASSERT(pg_cnt > 0 && pg_cnt < 3840);
+void* malloc_page(enum pool_flags pf,uint32_t pg_cnt)
+{
+    ASSERT(pg_cnt > 0 && pg_cnt < 3840);
     
-//     void* vaddr_start = vaddr_get(pf,pg_cnt);
-//     if(vaddr_start == NULL)	return NULL;
+    void* vaddr_start = vaddr_get(pf,pg_cnt);
+    if(vaddr_start == NULL)	return NULL;
     
     
-//     uint32_t vaddr = (uint32_t)vaddr_start,cnt = pg_cnt;
-//     struct pool* mem_pool = pf & PF_KERNEL ? &kernel_pool : &user_pool;
+    uint32_t vaddr = (uint32_t)vaddr_start,cnt = pg_cnt;
+    struct pool* mem_pool = pf & PF_KERNEL ? &kernel_pool : &user_pool;
     
-//     while(cnt-- > 0)
-//     {
-//     	void* page_phyaddr = palloc(mem_pool);
-//     	if(page_phyaddr == NULL)	return NULL;
-//     	page_table_add((void*)vaddr,page_phyaddr);
-//     	vaddr += PG_SIZE;
-//     }
-//     return vaddr_start;
-// }
+    while(cnt-- > 0)
+    {
+    	void* page_phyaddr = palloc(mem_pool);
+    	if(page_phyaddr == NULL)	return NULL;
+    	page_table_add((void*)vaddr,page_phyaddr);
+    	vaddr += PG_SIZE;
+    }
+    return vaddr_start;
+}
 
-// void* get_kernel_pages(uint32_t pg_cnt)
-// {
-//     void* vaddr = malloc_page(PF_KERNEL,pg_cnt);
-//     if(vaddr != NULL)	memset(vaddr,0,pg_cnt*PG_SIZE);
-//     return vaddr;
-// }
+void* get_kernel_pages(uint32_t pg_cnt)
+{
+    void* vaddr = malloc_page(PF_KERNEL,pg_cnt);
+    if(vaddr != NULL)	memset(vaddr,0,pg_cnt*PG_SIZE);
+    return vaddr;
+}
 
 void mem_pool_init(uint32_t all_mem)
 {
@@ -185,7 +185,7 @@ void mem_pool_init(uint32_t all_mem)
 void mem_init()
 {
     put_str("mem_init start!\n");
-    uint32_t mem_bytes_total = (*(uint32_t*)(0x800)); //我们把总内存的值放在了0x800 我之前为了显示比较独特 放在了0x800处了
+    uint32_t mem_bytes_total = (*(uint32_t*)(0xb00)); //我们把总内存的值放在了0x800 我之前为了显示比较独特 放在了0x800处了
     mem_pool_init(mem_bytes_total);
     put_str("mem_init done!\n");
     return;

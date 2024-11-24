@@ -8,7 +8,8 @@
                 "lib",
                 "lib/kernel/",
                 "include/",
-                "device/"
+                "device/",
+                "thread/"
 
             ],
             "defines": [],
