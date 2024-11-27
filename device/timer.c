@@ -31,7 +31,7 @@ static void frequency_set(uint8_t counter_port,uint8_t counter_no,uint8_t rwl,ui
     outb(PIT_CONTROL_PORT,(uint8_t)(counter_no << 6 | rwl << 4 | counter_mode << 1));
     //下面写入counter_value的低8位和高八位
     outb(counter_port,(uint8_t)counter_value);
-    outb(counter_port,(uint8_t)(counter_value >> 8));
+    outb(counter_port,(uint8_t)counter_value >> 8);
 }
 
 static void intr_timer_handler(void)

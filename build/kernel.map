@@ -182,9 +182,9 @@ LOAD build/switch.o
  .text.__x86.get_pc_thunk.ax
                 0xc0001b05        0x4 build/interrupt.o
                 0xc0001b05                __x86.get_pc_thunk.ax
- .text          0xc0001b09      0x1b2 build/timer.o
-                0xc0001c53                timer_init
- *fill*         0xc0001cbb        0x5 
+ .text          0xc0001b09      0x1b4 build/timer.o
+                0xc0001c55                timer_init
+ *fill*         0xc0001cbd        0x3 
  .text          0xc0001cc0      0x396 build/kernel.o
                 0xc0001cc0                intr_exit
  *fill*         0xc0002056        0xa 
@@ -217,34 +217,34 @@ LOAD build/switch.o
                 0xc0002ac9                get_kernel_pages
                 0xc0002b13                mem_pool_init
                 0xc0002d1a                mem_init
- .text          0xc0002d6e      0x271 build/bitmap.o
+ .text          0xc0002d6e      0x272 build/bitmap.o
                 0xc0002d6e                bitmap_init
                 0xc0002da1                bitmap_scan_test
-                0xc0002de9                bitmap_scan
-                0xc0002f17                bitmap_set
- .text          0xc0002fdf      0x4a8 build/thread.o
-                0xc0002fdf                runing_thread
-                0xc0002ffe                kernel_thread
-                0xc000302a                thread_create
-                0xc00030ae                init_thread
-                0xc0003151                thread_start
-                0xc00032e6                schedule
-                0xc0003422                thread_init
+                0xc0002dea                bitmap_scan
+                0xc0002f18                bitmap_set
+ .text          0xc0002fe0      0x4a8 build/thread.o
+                0xc0002fe0                runing_thread
+                0xc0002fff                kernel_thread
+                0xc000302b                thread_create
+                0xc00030af                init_thread
+                0xc0003152                thread_start
+                0xc00032e7                schedule
+                0xc0003423                thread_init
  .text.__x86.get_pc_thunk.dx
-                0xc0003487        0x4 build/thread.o
-                0xc0003487                __x86.get_pc_thunk.dx
- .text          0xc000348b      0x25e build/list.o
-                0xc000348b                list_init
-                0xc00034c3                list_insert_before
-                0xc0003517                list_push
-                0xc000353f                list_append
-                0xc0003567                list_remove
-                0xc00035b0                list_pop
-                0xc00035dc                elem_find
-                0xc0003621                list_traversal
-                0xc000368a                list_len
-                0xc00036c9                list_empty
- *fill*         0xc00036e9        0x7 
+                0xc0003488        0x4 build/thread.o
+                0xc0003488                __x86.get_pc_thunk.dx
+ .text          0xc000348c      0x261 build/list.o
+                0xc000348c                list_init
+                0xc00034c4                list_insert_before
+                0xc0003518                list_push
+                0xc0003540                list_append
+                0xc0003568                list_remove
+                0xc00035b1                list_pop
+                0xc00035dd                elem_find
+                0xc0003622                list_traversal
+                0xc000368b                list_len
+                0xc00036ca                list_empty
+ *fill*         0xc00036ed        0x3 
  .text          0xc00036f0       0x15 build/switch.o
                 0xc00036f0                switch_to
  *(.gnu.warning)
