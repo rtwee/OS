@@ -1,6 +1,9 @@
 #include "timer.h"
 #include "io.h"
 #include "print.h"
+#include "thread.h"
+#include "debug.h"
+#include "interrupt.h"
 
 #define IRQ_FREQUENCY       100
 #define INPUT_FREQUENCY     1193180
@@ -11,6 +14,7 @@
 #define READ_WRITE_LATCH    3
 #define PIT_CONTROL_PORT    0x43        //控制端口
 
+uint32_t ticks;
 /*
     把计数器的 计数 写入，设置读写锁、计数器模式
     //1.先设置0x43端口，设置工作模式等
@@ -30,10 +34,22 @@ static void frequency_set(uint8_t counter_port,uint8_t counter_no,uint8_t rwl,ui
     outb(counter_port,(uint8_t)(counter_value >> 8));
 }
 
+static void intr_timer_handler(void)
+{
+    struct task_struct * cur_thread = runing_thread();
+    ASSERT(cur_thread->stack_magic == 0x20000319);
+
+    cur_thread->elapsed_ticks++;
+    ticks++;
+    if(cur_thread->ticks == 0) schedule();
+    else cur_thread->ticks--;
+}
+
 //初始化计数器
 void timer_init()
 {
     put_str("timer start\n");
     frequency_set(COINTERO_PORT,COUNTERO_NO,READ_WRITE_LATCH,COUNTER_MODE,COUNTERO_VALUE);
+    register_handler(0x20,intr_timer_handler);
     put_str("timer_init done\n");
 }

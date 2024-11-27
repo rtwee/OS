@@ -3,7 +3,6 @@
 // #include "global.h"
 #include "stdint.h"
 #define BITMAP_MASK 1
-typedef int bool;
 
 struct bitmap
 {

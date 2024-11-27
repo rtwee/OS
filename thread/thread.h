@@ -1,6 +1,7 @@
 #ifndef __THREAD_THREAD_H
 #define __THREAD_THREAD_H
 #include "stdint.h"
+#include "list.h"
 
 typedef void thread_func(void *);
 
@@ -64,8 +65,17 @@ struct task_struct
 {
     uint32_t * self_ksatck; //各个线程都用自己的内核栈
     enum task_status status;
-    uint8_t priority;       //栈的优先级
     char name[16];
+    uint8_t priority;       //栈的优先级
+    uint8_t ticks;          //每次在处理器上执行的时间滴答数
+
+    uint32_t elapsed_ticks; //任务总站用的滴答数
+
+    struct list_elem general_tag;//在一般队列中的结点,如果要把线程加入就绪队列，那就直接放这个
+
+    struct list_elem all_list_tag;//在所有页面的结点
+
+    uint32_t *pdgir;
     uint32_t stack_magic;   //栈的边界标记
 };
 
@@ -73,5 +83,7 @@ void kernel_thread(thread_func* function,void* func_arg);
 void thread_create(struct task_struct* pthread,thread_func function,void* func_arg);
 void init_thread(struct task_struct* pthread,char* name,int prio);
 struct task_struct* thread_start(char* name,int prio,thread_func function,void* func_arg);
-
+struct task_struct * runing_thread();
+void schedule();
+void thread_init();
 #endif
