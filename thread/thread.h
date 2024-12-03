@@ -1,89 +1,95 @@
-#ifndef __THREAD_THREAD_H
-#define __THREAD_THREAD_H
-#include "stdint.h"
-#include "list.h"
+# ifndef _THREAD_H
+# define _THREAD_H
 
-typedef void thread_func(void *);
+# include "stdint.h"
+# include "kernel/list.h"
 
-//进程的几种运行状态
-enum task_status
-{
+/**
+ * 自定义通用函数类型.
+ */ 
+typedef void thread_func(void*);
+
+/**
+ * 线程状态.
+ */ 
+enum task_status {
     TASK_RUNNING,
     TASK_READY,
     TASK_BLOCKED,
-    TASK_WAITING,
+    TASK_WAITTING,
     TASK_HANGING,
     TASK_DIED
 };
 
-//中断发生时维护的栈信息
-struct intr_stack
-{
-    uint32_t vec_no;    //interrupt 中的 push %1压入的中断号
-    uint32_t edi;
-    uint32_t esi;
-    uint32_t ebp;
-    uint32_t esp_dummp;
-    uint32_t ebx;
-    uint32_t edx;
-    uint32_t ecx;
-    uint32_t eax;
-    uint32_t gs;
-    uint32_t fs;
-    uint32_t es;
+/**
+ * 中断栈.
+ */
+struct intr_stack {
+    uint32_t vec_no;
+    uint32_t edi;  
+    uint32_t esi;  
+    uint32_t ebp;  
+    uint32_t esp_dummy;  
+    uint32_t ebx;  
+    uint32_t edx;  
+    uint32_t ecx;  
+    uint32_t eax;  
+    uint32_t gs;  
+    uint32_t fs;  
+    uint32_t es;  
     uint32_t ds;
 
-    uint32_t err_code;  //错误码
-    void (*eip)(void);  //ip
-    uint32_t cs;        //cs段
+    // 下面的属性由CPU从低特权级进入高特权级时压入
+    uint32_t err_code;  
+    void (*eip) (void);
+    uint32_t cs;
     uint32_t eflags;
-    void * esp;         //如果发生栈的变化
+    void* esp;
     uint32_t ss;
 };
 
-//线程栈
-//保存要执行的函数
-//在使用switch to时保存现场环境
-struct thread_stack
-{
+struct thread_stack {
     uint32_t ebp;
     uint32_t ebx;
     uint32_t edi;
     uint32_t esi;
 
-    //第一次执行时，eip指向的调用的函数kernel_thread,其他时候eip是指向switch to的返回地址
-    void (*eip)(thread_func * func,void * func_arg);
+    // 第一次执行时指向待调用的函数kernel_thread，其它时候指向switch_to的返回地址.
+    void (*eip) (thread_func* func, void* func_args);
 
-    //unused_ret只为占位置充数返回地址
     void (*unused_retaddr);
-    thread_func * function;     //由kernel_thread调用的函数名和参数
-    void * func_arg;
+    thread_func* function;
+    void* func_args;
 };
 
-//进程或者线程的pcb，程序控制块
-struct task_struct
-{
-    uint32_t * self_ksatck; //各个线程都用自己的内核栈
+/**
+ * PCB，进程或线程的控制块.
+ */ 
+struct task_struct {
+    // 内核栈
+    uint32_t* self_kstack;
     enum task_status status;
     char name[16];
-    uint8_t priority;       //栈的优先级
-    uint8_t ticks;          //每次在处理器上执行的时间滴答数
-
-    uint32_t elapsed_ticks; //任务总站用的滴答数
-
-    struct list_elem general_tag;//在一般队列中的结点,如果要把线程加入就绪队列，那就直接放这个
-
-    struct list_elem all_list_tag;//在所有页面的结点
-
-    uint32_t *pdgir;
-    uint32_t stack_magic;   //栈的边界标记
+    uint8_t priority;
+    // 当前线程可以占用的CPU嘀嗒数
+    uint8_t ticks;
+    // 此任务占用的总嘀嗒数
+    uint32_t elaspsed_ticks;
+    // 可执行队列节点
+    struct list_elem general_tag;
+    // 所有不可运行线程队列节点
+    struct list_elem all_list_tag;
+    uint32_t* pgdir;
+    uint32_t stack_magic;
 };
 
-void kernel_thread(thread_func* function,void* func_arg);
-void thread_create(struct task_struct* pthread,thread_func function,void* func_arg);
-void init_thread(struct task_struct* pthread,char* name,int prio);
-struct task_struct* thread_start(char* name,int prio,thread_func function,void* func_arg);
-struct task_struct * runing_thread();
+struct task_struct* running_thread();
+void thread_create(struct task_struct* pthread, thread_func function, void* func_args);
+void init_thread(struct task_struct* pthread, char* name, int prio);
+struct task_struct* thread_start(char* name, int prio, thread_func function, void* func_args);
 void schedule();
 void thread_init();
-#endif
+void thread_block(enum task_status status);
+void thread_unblock(struct task_struct* pthread);
+
+# endif

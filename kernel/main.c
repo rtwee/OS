@@ -1,41 +1,38 @@
-//将来被指定入口地址在0xc0001500
-//ld main.o -Ttext 0xc0001500 -e main -o kernel.bin
-//ld来链接程序  -Ttext 指定起始的虚拟地址 -e 表示的入口地址 w我们用main函数，因此使用-e main
-//如果不指定入口地址，则会使用默认的_start,因此如果把main函数名改成_start,即使不指定入口地址也是可以运行的
-#include "print.h"
-#include "init.h"
-#include "debug.h"
-#include "string.h"
-#include "memory.h"
-#include "thread.h"
-#include "interrupt.h"
+# include "print.h"
+# include "init.h"
+# include "thread.h"
+# include "interrupt.h"
+# include "console.h"
 
-void test_thread_a(void* arg);
-void test_thread_b(void* arg);
-
+void k_thread_function_a(void*);
+void k_thread_function_b(void*);
 
 int main(void) {
-   put_str("I am kernel\n");
-   init_all();
-   thread_start("kernel_thread_a",31,test_thread_a,"argA ");
-   thread_start("kernel_thread_b",8,test_thread_b,"argB ");
-   intr_enable();
+    // 这里不能使用console_put_str，因为还没有初始化
+    put_str("I am kernel.\n");
+    init_all();
 
-   while(1)
-   {
-      put_str("Main ");
-   }
-   return 0;
+    thread_start("k_thread_a", 31, k_thread_function_a, "threadA ");
+    thread_start("k_thread_b", 8, k_thread_function_b, "threadB ");
+
+    intr_enable();
+
+    while (1) {
+        console_put_str("main ");
+    }
+
+    return 0;
 }
 
-void test_thread_a(void* arg)
-{
-    while(1)
-    	put_str((char*)arg);
+void k_thread_function_a(void* args) {
+    // 这里必须是死循环，否则执行流并不会返回到main函数，所以CPU将会放飞自我，出发6号未知操作码异常
+    while (1) {
+        console_put_str((char*) args);
+    }
 }
 
-void test_thread_b(void* arg)
-{
-    while(1)
-    	put_str((char*)arg);
+void k_thread_function_b(void* args) {
+    while (1) {
+        console_put_str((char*) args);
+    }
 }
