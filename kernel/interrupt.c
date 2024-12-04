@@ -4,7 +4,7 @@
 # include "interrupt.h"
 # include "print.h"
 
-# define IDT_DESC_CNT 0x21
+# define IDT_DESC_CNT 0x30
 # define PIC_M_CTRL 0x20
 # define PIC_M_DATA 0x21
 # define PIC_S_CTRL 0xa0
@@ -184,7 +184,10 @@ static void pic_init(void) {
     outb(PIC_S_DATA, 0x02);
     outb(PIC_S_DATA, 0x01);
 
-    outb(PIC_M_DATA, 0xfe);
+    // outb(PIC_M_DATA, 0xfe);
+    // outb(PIC_S_DATA, 0xff);
+    //测试键盘中断，先关闭其他中断
+    outb(PIC_M_DATA, 0xfc);
     outb(PIC_S_DATA, 0xff);
 
     put_str("pic_init done.\n");
