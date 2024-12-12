@@ -9,7 +9,8 @@
                 "lib/kernel/",
                 "include/",
                 "device/",
-                "thread/"
+                "thread/",
+                "userprog/"
 
             ],
             "defines": [],

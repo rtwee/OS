@@ -14,8 +14,8 @@ int main(void) {
     put_str("I am kernel.\n");
     init_all();
 
-    thread_start("k_thread_a", 31, k_thread_function_a, "threadA :");
-    thread_start("k_thread_b", 31, k_thread_function_b, "threadB :");
+    // thread_start("k_thread_a", 31, k_thread_function_a, "threadA :");
+    // thread_start("k_thread_b", 31, k_thread_function_b, "threadB :");
 
     intr_enable();
 
